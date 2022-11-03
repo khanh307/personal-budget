@@ -4,6 +4,10 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/PersonalBudget/app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/layout/fragment_add.xml" value="0.25" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/layout/fragment_chart.xml" value="0.25" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/layout/fragment_trans.xml" value="0.25" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/menu/menu_bottom_nav.xml" value="0.152" />
       </map>
     </option>
   </component>
