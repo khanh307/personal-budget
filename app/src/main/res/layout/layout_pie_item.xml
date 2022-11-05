@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="5dp">
+
+
+    <androidx.cardview.widget.CardView
+        android:layout_alignParentLeft="true"
+        android:id="@+id/color_item"
+        android:layout_width="50dp"
+        android:layout_height="30dp"
+        app:cardBackgroundColor="@color/primary"
+        app:cardCornerRadius="5dp">
+
+        <TextView
+            android:id="@+id/percent_item"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="25%"
+            android:textColor="@color/white"
+            android:textSize="16sp"/>
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:textColor="@color/black"
+        android:layout_toEndOf="@id/color_item"
+        android:id="@+id/name_item"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginLeft="10dp"
+        android:baselineAligned="false"
+        android:gravity="center"
+        android:text="Ăn uống"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:layout_alignParentRight="true"
+        android:id="@+id/total_item"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginLeft="10dp"
+        android:baselineAligned="false"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:text="100.000đ"
+        android:textSize="16sp"/>
+
+</RelativeLayout>
