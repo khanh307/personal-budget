@@ -3,15 +3,27 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/PersonalBudget/app/src/main/res/drawable/backgroud_dialog.xml" value="0.1615" />
         <entry key="..\:/PersonalBudget/app/src/main/res/drawable/backgroud_textview_selected.xml" value="0.149" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/drawable/backgroud_top.xml" value="0.134" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/drawable/background_bottom.xml" value="0.134" />
         <entry key="..\:/PersonalBudget/app/src/main/res/drawable/background_button_number.xml" value="0.149" />
         <entry key="..\:/PersonalBudget/app/src/main/res/drawable/background_textview_add_frag.xml" value="0.149" />
         <entry key="..\:/PersonalBudget/app/src/main/res/drawable/background_textview_anim.xml" value="0.149" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/drawable/background_textview_unselected.xml" value="0.1615" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/drawable/button_pressed.xml" value="0.1615" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/drawable/tab_selected.xml" value="0.1615" />
         <entry key="..\:/PersonalBudget/app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/layout/activity_update.xml" value="0.25" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/layout/dialog_pick_month.xml" value="0.2" />
         <entry key="..\:/PersonalBudget/app/src/main/res/layout/fragment_add.xml" value="0.25" />
         <entry key="..\:/PersonalBudget/app/src/main/res/layout/fragment_chart.xml" value="0.25" />
         <entry key="..\:/PersonalBudget/app/src/main/res/layout/fragment_trans.xml" value="0.25" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/layout/layout_content_trans.xml" value="0.24895833333333334" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/layout/layout_dialog.xml" value="0.25" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/layout/layout_item_recycler_view_add_frag.xml" value="0.25" />
         <entry key="..\:/PersonalBudget/app/src/main/res/layout/layout_pie_item.xml" value="0.25" />
+        <entry key="..\:/PersonalBudget/app/src/main/res/layout/layout_title_trans.xml" value="0.25" />
         <entry key="..\:/PersonalBudget/app/src/main/res/menu/menu_bottom_nav.xml" value="0.152" />
       </map>
     </option>

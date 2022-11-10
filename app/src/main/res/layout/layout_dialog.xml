@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/background">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/primary"
+        android:text="Thêm nhãn"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"/>
+
+    <EditText
+        android:hint="Nhập tên nhãn"
+        android:padding="5dp"
+        android:textSize="17sp"
+        android:textColor="@color/black"
+        android:id="@+id/edit_name"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/background_textview_anim"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/title"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/save_btn"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="30dp"
+        android:background="@color/toolbar"
+        android:layout_below="@id/edit_name"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:text="Lưu"
+        android:textColor="@color/white"
+        android:textAllCaps="false"
+        android:textSize="20sp"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/cancel_btn"
+        android:layout_marginRight="30dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="30dp"
+        android:background="@color/primary"
+        android:layout_below="@id/edit_name"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:text="Hủy"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:layout_marginBottom="30dp"
+        android:textSize="20sp"/>
+
+
+
+</RelativeLayout>

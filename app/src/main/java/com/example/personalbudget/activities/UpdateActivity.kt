@@ -1,120 +1,94 @@
-package com.example.personalbudget.fragments
+package com.example.personalbudget.activities
 
-import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
-import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.media.session.MediaSession.Token
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.ContactsContract.Intents.Insert
-import android.text.format.DateUtils
 import android.util.Log
-import android.view.*
+import android.view.Gravity
+import android.view.View
+import android.view.Window
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.personalbudget.Models.AddItem
+import com.example.personalbudget.Models.TransModel
 import com.example.personalbudget.R
 import com.example.personalbudget.Ultils.MyDatabeseUtils
 import com.example.personalbudget.adapter.ItemAddAdapter
 import com.example.personalbudget.listener.ItemAddListener
-import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.android.synthetic.main.fragment_add.*
-import org.w3c.dom.Text
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
+class UpdateActivity : AppCompatActivity(), ItemAddListener {
 
-class AddFragment : Fragment(), ItemAddListener {
-
-    private lateinit var layoutKeyBoard: View
-    private lateinit var recyclerView: RecyclerView
     private lateinit var arrayItem: ArrayList<AddItem>
     private lateinit var itemAddAdapter: ItemAddAdapter
+    private lateinit var database: SQLiteDatabase
+    private var clicked = ""
+    private var tab_select = "collect"
+    private lateinit var item: TransModel
+
     private lateinit var dialog: DatePickerDialog
     private lateinit var timePickerDialog: TimePickerDialog
-    private lateinit var database: SQLiteDatabase
-    private lateinit var layout_recyclerview: View
-    private lateinit var title_recycler: TextView
-    private lateinit var textType: EditText
-    private lateinit var textAccount: EditText
-    private var clicked = ""
-    private lateinit var type: AddItem
-    private lateinit var account: AddItem
-    private lateinit var textNote: EditText
-    private lateinit var textDate: EditText
-    private lateinit var textTime: EditText
-    private lateinit var textMoney: EditText
-    private lateinit var collect_btn: AppCompatButton
-    private lateinit var spending_btn: AppCompatButton
-    private var tab_select = "spending"
 
-    val DATABASE_NAME: String = "personal_budget.db"
+    private var type: AddItem? = null
+    private var account: AddItem? = null
 
-    @SuppressLint("MissingInflatedId")
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_add, container, false)
-        textMoney = view.findViewById(R.id.textMoney)
-        textDate = view.findViewById(R.id.textDate)
-        textTime = view.findViewById(R.id.textTime)
-        textAccount = view.findViewById(R.id.textAccount)
-        textType = view.findViewById(R.id.textType)
-        val number_close_btn: ImageButton = view.findViewById(R.id.number_close_btn)
-        val recycler_close_btn: ImageButton = view.findViewById(R.id.recycler_close_btn)
-        textNote = view.findViewById(R.id.textNote)
-        collect_btn = view.findViewById(R.id.collect_btn)
-        spending_btn = view.findViewById(R.id.spending_btn)
-        val save_btn: AppCompatButton = view.findViewById(R.id.save_btn)
-        val delete_btn: AppCompatButton = view.findViewById(R.id.delete_btn)
-        layoutKeyBoard = view.findViewById(R.id.layoutKeyBoard)
-        recyclerView = view.findViewById(R.id.recyclerview_add_frag)
-        layout_recyclerview = view.findViewById(R.id.layout_recyclerview)
-        title_recycler = view.findViewById(R.id.title_recycler)
-        arrayItem = ArrayList()
-        itemAddAdapter = ItemAddAdapter(requireContext(), arrayItem, this)
-        recyclerView.setHasFixedSize(true)
-        recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
-        recyclerView.adapter = itemAddAdapter
-
-        collect_btn.setOnClickListener {
-            tab_select = "collect"
-            collect_btn.setBackgroundResource(R.drawable.button_pressed)
-            spending_btn.setBackgroundResource(R.drawable.tab_selected)
-            collect_btn.setTextColor(resources.getColor(R.color.primary))
-            spending_btn.setTextColor(R.color.black)
-            if (clicked.equals("type")) {
-                setDataRecyclerView("type")
-            }
-        }
-
-        spending_btn.setOnClickListener {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_update)
+        item = intent.getSerializableExtra("item") as TransModel
+        textDate.setText(item.date)
+        textTime.setText(item.time)
+        textType.setText(item.name!!.name)
+        textAccount.setText(item.account!!.name)
+        var decimalFormat = DecimalFormat("###,###,###");
+        var money: Long = 0
+        if (item.money < 0){
             tab_select = "spending"
+            money = -item.money
             spending_btn.setBackgroundResource(R.drawable.button_pressed)
             spending_btn.setTextColor(resources.getColor(R.color.primary))
-            collect_btn.setBackgroundResource(R.drawable.tab_selected)
-            collect_btn.setTextColor(R.color.black)
-            if (clicked.equals("type")) {
-                setDataRecyclerView("type")
-            }
+            collect_btn.visibility = View.GONE
+        } else {
+            tab_select = "collect"
+            money = item.money
+            collect_btn.setBackgroundResource(R.drawable.button_pressed)
+            collect_btn.setTextColor(resources.getColor(R.color.primary))
+            spending_btn.visibility = View.GONE
         }
+        textMoney.setText(decimalFormat.format(money).toString())
+        textNote.setText(item.note)
+        setListener()
+    }
 
-        database = requireContext().openOrCreateDatabase(DATABASE_NAME, Context.MODE_PRIVATE, null);
+    private fun setListener(){
+        delete_btn.visibility = View.VISIBLE
+        arrayItem = ArrayList()
+        itemAddAdapter = ItemAddAdapter(this, arrayItem, this)
+        recyclerview_add_frag.setHasFixedSize(true)
+        recyclerview_add_frag.layoutManager = GridLayoutManager(this, 3)
+        recyclerview_add_frag.adapter = itemAddAdapter
+        database = openOrCreateDatabase(MyDatabeseUtils.DATABASE_NAME, Context.MODE_PRIVATE, null);
+
         number_close_btn.setOnClickListener {
             layoutKeyBoard.visibility = View.GONE
         }
@@ -122,33 +96,32 @@ class AddFragment : Fragment(), ItemAddListener {
             layout_recyclerview.visibility = View.GONE
             clicked = ""
         }
-
         textNote.setOnFocusChangeListener { v, hasFocus ->
-            view?.let { view.hideKeyboard() }
+            v?.let { v.hideKeyboard() }
         }
 
         textMoney.setOnFocusChangeListener { v, asFocus ->
             if (asFocus) {
                 layoutKeyBoard.visibility = View.VISIBLE
-                setNumberKeyBoard(view, textMoney)
+                setNumberKeyBoard(textMoney)
             } else {
                 layoutKeyBoard.visibility = View.GONE
             }
         }
-        val date = Date()
-
-        val myDateFormat = "dd/MM/yyyy" // mention the format you need
-        val myTimeFormat = "HH:mm"
-        val dateFormat = SimpleDateFormat(myDateFormat, Locale.US)
-        val timeFormat = SimpleDateFormat(myTimeFormat, Locale.US)
-        textDate.setText(dateFormat.format(date).toString())
-        textTime.setText(timeFormat.format(date).toString())
 
         textDate.setOnFocusChangeListener { v, hasFocus ->
             if (hasFocus) {
                 openDatePicker(textDate)
             } else {
                 dialog.dismiss()
+            }
+        }
+
+        textTime.setOnFocusChangeListener { v, hasFocus ->
+            if (hasFocus) {
+                openTimePicker(textTime)
+            } else {
+                timePickerDialog.dismiss()
             }
         }
 
@@ -172,45 +145,68 @@ class AddFragment : Fragment(), ItemAddListener {
             }
         }
 
-        textTime.setOnFocusChangeListener { v, hasFocus ->
-            if (hasFocus) {
-                openTimePicker(textTime)
-            } else {
-                timePickerDialog.dismiss()
-            }
-        }
-
         save_btn.setOnClickListener {
-            insertNewTrans()
+            updateTrans()
         }
-
-        return view
+        delete_btn.setOnClickListener {
+            deleteTrans()
+        }
     }
 
-    private fun insertNewTrans() {
+    private fun deleteTrans() {
+        val query = "DELETE FROM trans WHERE id = " + item.id
+        database.execSQL(query)
+        var update = ""
+        if (item.money < 0){
+            update = "UPDATE title \n" +
+                    "SET spendingmoney = (SELECT spendingmoney FROM title WHERE date = '"+ item.date + "') - "+ (-item.money) + "\n" +
+                    "WHERE date = '" + item.date + "'"
+        } else {
+            update = "UPDATE title \n" +
+                    "SET collectmoney = (SELECT collectmoney FROM title WHERE date = '"+ item.date + "') - "+ (item.money) + "\n" +
+                    "WHERE date = '" + item.date + "'"
+        }
+        database.execSQL(update)
+        Toast.makeText(this, "Xóa thành công", Toast.LENGTH_SHORT).show()
+        finish()
+    }
+
+    private fun updateTrans() {
         if (textAccount.text.isEmpty()) {
-            Toast.makeText(requireContext(), "Nhập Tài khoản", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Nhập Tài khoản", Toast.LENGTH_SHORT).show()
             return
         } else if (textType.text.isEmpty()) {
-            Toast.makeText(requireContext(), "Nhập Thể loại", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Nhập Thể loại", Toast.LENGTH_SHORT).show()
             return
         } else if (textMoney.text.isEmpty()) {
-            Toast.makeText(requireContext(), "Nhập Số tiền", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Nhập Số tiền", Toast.LENGTH_SHORT).show()
             return
         }
-        val idaccount = account.id
-        val idtype = type.id
+
+        var idaccount = ""
+        if (account == null) {
+            idaccount = item.account!!.id
+        } else {
+            idaccount = account!!.id
+        }
+        var idtype = ""
+        if (type == null){
+            idtype = item.name!!.id
+        } else {
+            idtype = type!!.id
+        }
+
         val note: String = textNote.text.toString()
         val date = textDate.text.toString()
         val time = textTime.text.toString()
         var money = textMoney.text.toString().replace(".", "")
         var values: ContentValues = ContentValues()
+
         if (tab_select.equals("spending")) {
             money = "-" + money
         }
 
         values.put(MyDatabeseUtils.KEY_ACCOUNT_TRANS, idaccount)
-
         if (tab_select.equals("spending")) {
             values.put(MyDatabeseUtils.KEY_TYPE_TRANS, idtype)
         } else {
@@ -228,7 +224,6 @@ class AddFragment : Fragment(), ItemAddListener {
         var cursor: Cursor = database!!.rawQuery(query, null)
         cursor.moveToFirst()
         if (cursor.count <= 0) {
-            Log.d("readTitle", "cursor null")
             var para = ContentValues()
             para.put(MyDatabeseUtils.KEY_DATE_TRANS, date)
             if (tab_select.equals("spending")) {
@@ -258,21 +253,8 @@ class AddFragment : Fragment(), ItemAddListener {
             database!!.execSQL(query)
         }
 
-        textNote.setText("")
-        textAccount.setText("")
-        textType.setText("")
-        textMoney.setText("")
-        val myDate = Date()
-
-        val myDateFormat = "dd/MM/yyyy" // mention the format you need
-        val myTimeFormat = "HH:mm"
-        val dateFormat = SimpleDateFormat(myDateFormat, Locale.US)
-        val timeFormat = SimpleDateFormat(myTimeFormat, Locale.US)
-        textDate.setText(dateFormat.format(myDate).toString())
-        textTime.setText(timeFormat.format(myDate).toString())
-
-        Toast.makeText(requireContext(), "Thêm thành công", Toast.LENGTH_SHORT).show()
-
+        Toast.makeText(this, "Cập nhật thành công", Toast.LENGTH_SHORT).show()
+        deleteTrans()
     }
 
     private fun openTimePicker(textTime: EditText) {
@@ -281,7 +263,7 @@ class AddFragment : Fragment(), ItemAddListener {
         val minute = cal.get(Calendar.MINUTE)
 
         timePickerDialog = TimePickerDialog(
-            requireContext(),
+            this,
             TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
                 cal.set(Calendar.HOUR_OF_DAY, hourOfDay)
                 cal.set(Calendar.MINUTE, minute)
@@ -310,7 +292,7 @@ class AddFragment : Fragment(), ItemAddListener {
             }
 
         dialog = DatePickerDialog(
-            requireContext(), dateSetListener,
+            this, dateSetListener,
             cal.get(Calendar.YEAR),
             cal.get(Calendar.MONTH),
             cal.get(Calendar.DAY_OF_MONTH)
@@ -319,19 +301,7 @@ class AddFragment : Fragment(), ItemAddListener {
         dialog.show()
     }
 
-    private fun setNumberKeyBoard(view: View, output: TextView) {
-        val button0: AppCompatButton = view.findViewById(R.id.button0)
-        val button1: AppCompatButton = view.findViewById(R.id.button1)
-        val button2: AppCompatButton = view.findViewById(R.id.button2)
-        val button3: AppCompatButton = view.findViewById(R.id.button3)
-        val button4: AppCompatButton = view.findViewById(R.id.button4)
-        val button5: AppCompatButton = view.findViewById(R.id.button5)
-        val button6: AppCompatButton = view.findViewById(R.id.button6)
-        val button7: AppCompatButton = view.findViewById(R.id.button7)
-        val button8: AppCompatButton = view.findViewById(R.id.button8)
-        val button9: AppCompatButton = view.findViewById(R.id.button9)
-        val buttonDone: AppCompatButton = view.findViewById(R.id.buttondone)
-        val buttonClear: ImageButton = view.findViewById(R.id.buttonclear)
+    private fun setNumberKeyBoard(output: TextView) {
 
         button0.setOnClickListener {
             if (output.text.isEmpty()) {
@@ -399,7 +369,7 @@ class AddFragment : Fragment(), ItemAddListener {
             var money = (output.text.toString() + "9").replace(".", "")
             output.setText(decimalFormat.format(money.toLong()))
         }
-        buttonClear.setOnClickListener {
+        buttonclear.setOnClickListener {
             var decimalFormat = DecimalFormat("###,###,###");
             if (output.text.toString().length > 0) {
                 var money = output.text.toString().substring(0, output.text.toString().length - 1)
@@ -414,7 +384,7 @@ class AddFragment : Fragment(), ItemAddListener {
             }
         }
 
-        buttonDone.setOnClickListener {
+        buttondone.setOnClickListener {
             layoutKeyBoard.visibility = View.GONE
         }
     }
@@ -444,11 +414,6 @@ class AddFragment : Fragment(), ItemAddListener {
         layout_recyclerview.visibility = View.VISIBLE
     }
 
-    fun View.hideKeyboard() {
-        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(windowToken, 0)
-    }
-
     override fun clickItem(item: AddItem) {
         if (!item.id.equals("add")) {
             if (clicked.equals("type")) {
@@ -464,7 +429,7 @@ class AddFragment : Fragment(), ItemAddListener {
     }
 
     private fun openDialog(type: String) {
-        val dialog = Dialog(requireContext())
+        val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.layout_dialog)
         dialog.setCancelable(true)
@@ -496,12 +461,12 @@ class AddFragment : Fragment(), ItemAddListener {
         save_btn.setOnClickListener {
             var name = edit_name.text
             if (name.isEmpty()) {
-                Toast.makeText(requireContext(), "Nhập tên nhãn", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Nhập tên nhãn", Toast.LENGTH_SHORT).show()
             } else {
                 var result = upCase(name.toString())
-                val query = "INSERT INTO " + type + " VALUES(NULL, '" + result + "')"
+                val query = "INSERT INTO " + type + tab_select + " VALUES(NULL, '" + result + "')"
                 database.execSQL(query)
-                Toast.makeText(requireContext(), "Thêm thành công", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Thêm thành công", Toast.LENGTH_SHORT).show()
                 setDataRecyclerView(type)
                 dialog.dismiss()
             }
@@ -521,5 +486,10 @@ class AddFragment : Fragment(), ItemAddListener {
         }
         return result.trim()
 
+    }
+
+    fun View.hideKeyboard() {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(windowToken, 0)
     }
 }

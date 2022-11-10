@@ -16,16 +16,6 @@
         android:padding="10dp"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:text="Tổng quan"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            android:textStyle="bold" />
 
         <Spinner
             android:id="@+id/spinner_chart"
@@ -36,14 +26,19 @@
             android:backgroundTint="@color/black"
             android:spinnerMode="dropdown" />
 
-        <Spinner
+        <TextView
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:gravity="left|center"
             android:layout_alignParentLeft="true"
-            android:id="@+id/spinner_left"
+            android:id="@+id/text_date"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:maxWidth="150dp"
+            android:layout_height="match_parent"
             android:layout_centerVertical="true"
-            android:backgroundTint="@color/black"
-            android:spinnerMode="dropdown" />
+            android:textColor="@color/black"
+            android:text="11.20.2022 ~ 11.20.2022"
+            android:drawableRight="@drawable/ic_show"/>
 
     </RelativeLayout>
 

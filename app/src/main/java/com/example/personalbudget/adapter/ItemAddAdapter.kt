@@ -7,10 +7,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.NonNull
 import androidx.recyclerview.widget.RecyclerView
+import com.example.personalbudget.Models.AddItem
 import com.example.personalbudget.R
+import com.example.personalbudget.listener.ItemAddListener
 
-class ItemAddAdapter(var context: Context, var arrayItem: ArrayList<String>) :
-    RecyclerView.Adapter<ItemAddAdapter.ItemHolder>() {
+class ItemAddAdapter(var context: Context, var arrayItem: ArrayList<AddItem>, var itemAddListener: ItemAddListener) :
+    RecyclerView.Adapter<ItemAddAdapter.ItemHolder>(){
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemAddAdapter.ItemHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.layout_item_recycler_view_add_frag, null)
         val holder = ItemHolder(view)
@@ -18,7 +20,10 @@ class ItemAddAdapter(var context: Context, var arrayItem: ArrayList<String>) :
     }
 
     override fun onBindViewHolder(holder: ItemAddAdapter.ItemHolder, position: Int) {
-        holder.textView.setText(arrayItem.get(position))
+        holder.textView.setText(arrayItem.get(position).name)
+        holder.itemView.setOnClickListener {
+            itemAddListener.clickItem(arrayItem.get(position))
+        }
     }
 
     override fun getItemCount(): Int {
