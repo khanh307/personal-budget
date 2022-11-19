@@ -31,20 +31,26 @@ import com.github.mikephil.charting.utils.ColorTemplate
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.abs
 
 
 class ChartFragment : Fragment() {
 
-    private lateinit var barChart: BarChartView;
+    //    private lateinit var barChart: BarChartView;
     private val animationDuration = 1000L
     private lateinit var peiChart: PieChart;
     private lateinit var spinnerChart: Spinner;
+    private lateinit var pieItem: ArrayList<PieEntry>
+    private lateinit var pieItemLegend: ArrayList<PieEntry>
     private lateinit var arrayItem: ArrayList<PieChartItem>
     private lateinit var cardAdapter: CardAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var text_date: TextView
+    private lateinit var noData: TextView
+    private lateinit var noDataRecyc: TextView
     private lateinit var dialog: DatePickerDialog
     private lateinit var database: SQLiteDatabase
+    private var total: Long = 0
 
     private lateinit var button1: AppCompatButton
     private lateinit var button2: AppCompatButton
@@ -62,17 +68,22 @@ class ChartFragment : Fragment() {
     private var year: String = ""
     private var begin: String = ""
     private var end: String = ""
+    private var tab_select = "spending"
 
-    @SuppressLint("MissingInflatedId")
+    @SuppressLint("MissingInflatedId", "ResourceAsColor")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_chart, container, false)
-        barChart = view.findViewById(R.id.barChart2)
+//        barChart = view.findViewById(R.id.barChart2)
         peiChart = view.findViewById(R.id.piechart);
         spinnerChart = view.findViewById(R.id.spinner_chart);
         text_date = view.findViewById(R.id.text_date)
+        noData = view.findViewById(R.id.noData)
+        noDataRecyc = view.findViewById(R.id.noDataRecyc)
+        var collect_btn: AppCompatButton = view.findViewById(R.id.collect_btn)
+        var spending_btn: AppCompatButton = view.findViewById(R.id.spending_btn)
         text_date.ellipsize = TextUtils.TruncateAt.END
         recyclerView = view.findViewById(R.id.recyclerview_chart_frag)
         recyclerView.setHasFixedSize(true)
@@ -80,64 +91,81 @@ class ChartFragment : Fragment() {
         arrayItem = ArrayList()
         cardAdapter = CardAdapter(requireContext(), arrayItem)
         recyclerView.adapter = cardAdapter
-        database = requireContext().openOrCreateDatabase(MyDatabeseUtils.DATABASE_NAME, Context.MODE_PRIVATE, null);
+        database = requireContext().openOrCreateDatabase(
+            MyDatabeseUtils.DATABASE_NAME,
+            Context.MODE_PRIVATE,
+            null
+        );
+
+        val calendar: Calendar = Calendar.getInstance()
+        val dates = getDayOfWeek(
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.DATE),
+            calendar.get(Calendar.MONTH)
+        )
+        begin = dates[0].toString()
+        end = dates[dates.size - 1].toString()
+
         setSpinner()
-        setUpBarChartWeek()
+
+        collect_btn.setOnClickListener {
+            tab_select = "collect"
+            collect_btn.setBackgroundResource(R.drawable.button_pressed)
+            spending_btn.setBackgroundResource(R.drawable.tab_selected)
+            collect_btn.setTextColor(resources.getColor(R.color.primary))
+            spending_btn.setTextColor(resources.getColor(R.color.black))
+            setupPieChart()
+        }
+
+        spending_btn.setOnClickListener {
+            tab_select = "spending"
+            spending_btn.setBackgroundResource(R.drawable.button_pressed)
+            spending_btn.setTextColor(resources.getColor(R.color.primary))
+            collect_btn.setBackgroundResource(R.drawable.tab_selected)
+            collect_btn.setTextColor(resources.getColor(R.color.black))
+            setupPieChart()
+        }
+
+//        setUpBarChartWeek()
         setupPieChart()
-        setDataReccyclerView()
+//        setDataReccyclerView()
+
+
         return view;
     }
 
-    private fun setDataReccyclerView() {
-        var labels = listOf("Ăn uống", "Giao thông", "Giải trí", "Học tập", "Sinh hoạt")
-        var colors = peiChart.data.colors
-        var persents = listOf<Float>(10f, 20f, 30f, 10f, 30f)
-
-
-        for (index in 0 until labels.size) {
-            val name = labels.get(index)
-            val color = colors.get(index)
-            val persent = persents.get(index).toInt()
-            val total = 1000000 * persent / 100
-            arrayItem.add(PieChartItem(persent, name, total, color))
-        }
-
-        for (index in 0 until labels.size) {
-            val name = labels.get(index)
-            val color = colors.get(index)
-            val persent = persents.get(index).toInt()
-            val total = 1000000 * persent / 100
-            arrayItem.add(PieChartItem(persent, name, total, color))
-
-        }
-
-        for (index in 0 until labels.size) {
-            val name = labels.get(index)
-            val color = colors.get(index)
-            val persent = persents.get(index).toInt()
-            val total = 1000000 * persent / 100
-            arrayItem.add(PieChartItem(persent, name, total, color))
-
-        }
-
-        cardAdapter.notifyDataSetChanged()
-    }
+//    private fun setDataReccyclerView() {
+////        var labels = ArrayList<String>()
+//        var colors = peiChart.data.colors
+////        var persents = listOf<Float>(10f, 20f, 30f, 10f, 30f)
+//
+//        for (index in 0 until pieItemLegend.size) {
+//            val name = pieItemLegend.get(index).label
+//            val color = colors.get(index)
+//            val persent = pieItemLegend.get(index).value.toInt()
+//            val tot = (persent * abs(total)  / 100).toInt()
+//            arrayItem.add(PieChartItem(persent, name, tot, color))
+//        }
+//
+//        cardAdapter.notifyDataSetChanged()
+//    }
 
     private fun setupPieChart() {
-        val NoOfEmp = ArrayList<PieEntry>()
+        getData()
+//        val NoOfEmp = ArrayList<PieEntry>()
 
-        NoOfEmp.add(PieEntry(10f, 1));
-        NoOfEmp.add(PieEntry(20f, 2));
-        NoOfEmp.add(PieEntry(30f, 3));
-        NoOfEmp.add(PieEntry(10f, 4));
-        NoOfEmp.add(PieEntry(30f, 5));
+//        NoOfEmp.add(PieEntry(10f, 1));
+//        NoOfEmp.add(PieEntry(20f, 2));
+//        NoOfEmp.add(PieEntry(30f, 3));
+//        NoOfEmp.add(PieEntry(10f, 4));
+//        NoOfEmp.add(PieEntry(30f, 5));
 
-        val dataSet = PieDataSet(NoOfEmp, "Number Of Employees")
+        val dataSet = PieDataSet(pieItem, "")
         val data = PieData(dataSet)
         peiChart.setData(data)
         peiChart.description.isEnabled = false
-        dataSet.setColors(*ColorTemplate.PASTEL_COLORS)
-        peiChart.animateXY(2000, 2000)
+        dataSet.setColors(*MyDatabeseUtils.PIE_COLORS)
+        peiChart.animateXY(1500, 1500)
         setLegend()
     }
 
@@ -145,61 +173,56 @@ class ChartFragment : Fragment() {
         val l = peiChart.legend;
         l.setFormSize(10f);
         l.setForm(Legend.LegendForm.SQUARE);
-        l.setYOffset(5f);
+        l.setYOffset(15f);
         l.setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER); // set vertical alignment for legend
         l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT); // set horizontal alignment for legend
         l.setOrientation(Legend.LegendOrientation.VERTICAL); // set orientation for legend
         l.setDrawInside(false);
-        l.setTextSize(12f);
+        l.setTextSize(15f);
         l.setTextColor(Color.BLACK);
 
         l.setYEntrySpace(1f);
 
         val entries: MutableList<LegendEntry> = ArrayList()
-        val yValues: ArrayList<PieEntry> = ArrayList()
-        yValues.add(PieEntry(10f, "Ăn uống"));
-        yValues.add(PieEntry(20f, "Giao thông"));
-        yValues.add(PieEntry(30f, "Giải trí"));
-        yValues.add(PieEntry(10f, "Học tập"));
-        yValues.add(PieEntry(30f, "Sinh hoạt"));
+//        val yValues: ArrayList<PieEntry> = ArrayList()
 
-        for (i in 0..yValues.size - 1) {
+        for (i in 0..pieItemLegend.size - 1) {
             val entry = LegendEntry()
-            entry.formColor = ColorTemplate.PASTEL_COLORS[i]
-            entry.label = yValues[i].label
+            entry.formColor = MyDatabeseUtils.PIE_COLORS[i]
+            entry.label = pieItemLegend[i].label
             entries.add(entry)
         }
         l.setCustom(entries)
     }
 
-    private fun setUpBarChartWeek() {
-        var array: java.util.ArrayList<String> = ArrayList()
-        val query = "SELECT * FROM title\n" +
-                "WHERE date >= '" + begin + "'\n" +
-                "and date <= '" + end + "'\n" +
-                "ORDER BY date DESC"
-        var cursor = database.rawQuery(query, null)
-        cursor.moveToFirst()
-        while (cursor.isAfterLast == false){
-
-        }
-        val a = 10F
-        val barSet = listOf(
-            "JAN" to a,
-            "FEB" to 2F,
-            "MAR" to 2F,
-            "MAY" to 4F,
-            "APR" to 4F
-        )
-        var colors = ArrayList<Int>()
-        for (i in 0..4) {
-            colors.add(ColorTemplate.PASTEL_COLORS.get(i))
-        }
-        barChart.barsColorsList = colors
-        barChart.labelsSize = 16F
-        barChart.animation.duration = animationDuration
-        barChart.animate(barSet)
-    }
+//    private fun setUpBarChartWeek() {
+//        var array: java.util.ArrayList<String> = ArrayList()
+//        val query = "SELECT * FROM title\n" +
+//                "WHERE date >= '" + begin + "'\n" +
+//                "and date <= '" + end + "'\n" +
+//                "ORDER BY date DESC"
+//        var cursor = database.rawQuery(query, null)
+//        cursor.moveToFirst()
+//        while (cursor.isAfterLast == false){
+//
+//        }
+//        val a = 10F
+//        val barSet = listOf(
+//            "JAN" to a,
+//            "FEB" to 2F,
+//            "MAR" to 2F,
+//            "MAY" to 4F,
+//            "APR" to 4F
+//        )
+//        var colors = ArrayList<Int>()
+//        for (i in 0..4) {
+//            colors.add(ColorTemplate.PASTEL_COLORS.get(i))
+//        }
+//        barChart.barsColorsList = colors
+//        barChart.labelsSize = 16F
+//        barChart.animation.duration = animationDuration
+//        barChart.animate(barSet)
+//    }
 
     private fun setSpinner() {
         val adapter = ArrayAdapter.createFromResource(
@@ -211,6 +234,7 @@ class ChartFragment : Fragment() {
         spinnerChart.adapter = adapter;
         Toast.makeText(requireContext(), spinnerChart.selectedItem.toString(), Toast.LENGTH_SHORT)
             .show()
+
         spinnerChart.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
@@ -232,7 +256,7 @@ class ChartFragment : Fragment() {
                     text_date.setOnClickListener {
                         openDatePicker()
                     }
-
+                    setupPieChart()
                 } else if (item.equals("Hàng Tháng")) {
                     val calendar: Calendar = Calendar.getInstance()
                     year = calendar.get(Calendar.YEAR).toString()
@@ -241,6 +265,7 @@ class ChartFragment : Fragment() {
                     text_date.setOnClickListener {
                         openDialogPicker()
                     }
+                    setupPieChart()
                 }
             }
 
@@ -248,7 +273,73 @@ class ChartFragment : Fragment() {
 
             }
         }
+    }
 
+    private fun getData() {
+
+        arrayItem.clear()
+        pieItem = ArrayList()
+        pieItemLegend = ArrayList()
+        val type = spinnerChart.selectedItem.toString()
+        var query = ""
+
+        if (tab_select.equals("spending")) {
+            if (type.equals("Hàng Tuần")) {
+                query = "SELECT name, SUM(money) FROM trans, typespending\n" +
+                        "WHERE date BETWEEN '" + begin + "' AND '" + end + "'\n" +
+                        "\tand idtype = typespending.id\n" +
+                        "GROUP BY idtype\n"
+            } else if (type.equals("Hàng Tháng")) {
+                query = "SELECT name, SUM(money) FROM trans, typespending\n" +
+                        "WHERE date like '%/" + month + "/" + year + "'\n" +
+                        "\tand idtype = typespending.id\n" +
+                        "GROUP BY idtype"
+            }
+        } else if (tab_select.equals("collect")) {
+            if (type.equals("Hàng Tuần")) {
+                query = "SELECT name, SUM(money) FROM trans, typecollect\n" +
+                        "WHERE date BETWEEN '" + begin + "' AND '" + end + "'\n" +
+                        "\tand idtypecollect = typecollect.id\n" +
+                        "GROUP BY idtypecollect\n"
+            } else if (type.equals("Hàng Tháng")) {
+                query = "SELECT name, SUM(money) FROM trans, typecollect\n" +
+                        "WHERE date like '%/" + month + "/" + year + "'\n" +
+                        "\tand idtypecollect = typecollect.id\n" +
+                        "GROUP BY idtypecollect"
+            }
+        }
+        total = 0
+        val cursor = database.rawQuery(query, null)
+        cursor.moveToFirst()
+        if (cursor.count > 0) {
+            while (cursor.isAfterLast == false) {
+                total += cursor.getString(1).toLong()
+                cursor.moveToNext()
+            }
+
+            cursor.moveToFirst()
+            while (cursor.isAfterLast == false) {
+                var name = cursor.getString(0)
+                var money = cursor.getString(1).toLong()
+                var persent: Long = ((abs(money).toFloat() / abs(total).toFloat()) * 100).toLong()
+                pieItem.add(PieEntry(persent.toFloat(), cursor.position + 1))
+                pieItemLegend.add(PieEntry(persent.toFloat(), name))
+                arrayItem.add(PieChartItem(persent.toInt(), name, abs(money), MyDatabeseUtils.PIE_COLORS[cursor.position]))
+                Log.d("typeSpinner", money.toString())
+                Log.d("typeSpinner", total.toString())
+                Log.d("typeSpinner", persent.toString())
+                cursor.moveToNext()
+            }
+        }
+        cardAdapter.notifyDataSetChanged()
+        cursor.close()
+        if (abs(total) <= "0".toLong()){
+            noDataRecyc.visibility = View.VISIBLE
+            noData.visibility = View.VISIBLE
+        } else {
+            noDataRecyc.visibility = View.GONE
+            noData.visibility = View.GONE
+        }
     }
 
     private fun openDatePicker() {
@@ -264,6 +355,7 @@ class ChartFragment : Fragment() {
                 begin = dates[0].toString()
                 end = dates[dates.size - 1].toString()
                 text_date.setText(begin + " ~ " + end)
+                setupPieChart()
             }
 
         dialog = DatePickerDialog(
@@ -275,7 +367,6 @@ class ChartFragment : Fragment() {
 
         dialog.show()
     }
-
 
     private fun getDayOfWeek(year: Int, date: Int, month: Int): Array<String?> {
         val now = Calendar.getInstance()
@@ -339,13 +430,14 @@ class ChartFragment : Fragment() {
             text_year.setText((y - 1).toString())
             year = text_year.text.toString()
             text_date.setText("Th" + month + " " + text_year.text)
-
+            setupPieChart()
         }
         next_btn.setOnClickListener {
             val y = text_year.text.toString().toInt()
             text_year.setText((y + 1).toString())
             year = text_year.text.toString()
             text_date.setText("Th" + month + " " + text_year.text)
+            setupPieChart()
 
         }
 
@@ -369,84 +461,84 @@ class ChartFragment : Fragment() {
             setColor(button1)
             text_date.setText("Th" + month + " " + text_year.text)
             dialog.dismiss()
-
+            setupPieChart()
         }
         button2.setOnClickListener {
             month = "2"
             setColor(button2)
             text_date.setText("Th" + month + " " + text_year.text)
             dialog.dismiss()
-
+            setupPieChart()
         }
         button3.setOnClickListener {
             month = "3"
             setColor(button3)
             text_date.setText("Th" + month + " " + text_year.text)
             dialog.dismiss()
-
+            setupPieChart()
         }
         button4.setOnClickListener {
             month = "4"
             setColor(button4)
             text_date.setText("Th" + month + " " + text_year.text)
             dialog.dismiss()
-
+            setupPieChart()
         }
         button5.setOnClickListener {
             month = "5"
             setColor(button5)
             text_date.setText("Th" + month + " " + text_year.text)
             dialog.dismiss()
-
+            setupPieChart()
         }
         button6.setOnClickListener {
             month = "6"
             setColor(button6)
             text_date.setText("Th" + month + " " + text_year.text)
             dialog.dismiss()
-
+            setupPieChart()
         }
         button7.setOnClickListener {
             month = "7"
             setColor(button7)
             text_date.setText("Th" + month + " " + text_year.text)
             dialog.dismiss()
-
+            setupPieChart()
         }
         button8.setOnClickListener {
             month = "8"
             setColor(button8)
             text_date.setText("Th" + month + " " + text_year.text)
             dialog.dismiss()
-
+            setupPieChart()
         }
         button9.setOnClickListener {
             month = "9"
             setColor(button9)
             text_date.setText("Th" + month + " " + text_year.text)
             dialog.dismiss()
-
+            setupPieChart()
         }
         button10.setOnClickListener {
             month = "10"
             setColor(button10)
             text_date.setText("Th" + month + " " + text_year.text)
             dialog.dismiss()
-
+            setupPieChart()
         }
         button11.setOnClickListener {
             month = "11"
             setColor(button11)
             text_date.setText("Th" + month + " " + text_year.text)
             dialog.dismiss()
-
+            setupPieChart()
         }
         button12.setOnClickListener {
             month = "12"
             setColor(button12)
             text_date.setText("Th" + month + " " + text_year.text)
             dialog.dismiss()
-
+            setupPieChart()
         }
 
         dialog.show()
@@ -468,5 +560,9 @@ class ChartFragment : Fragment() {
         button.setTextColor(resources.getColor(R.color.primary))
     }
 
+    override fun onStop() {
+        super.onStop()
+        database.close()
+    }
 }
 

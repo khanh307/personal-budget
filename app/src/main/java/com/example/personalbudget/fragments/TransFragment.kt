@@ -43,6 +43,7 @@ class TransFragment : Fragment(), ItemTransListener {
     private lateinit var button12: AppCompatButton
 
     private lateinit var recyclerView: RecyclerView
+    private lateinit var noData: TextView
     private lateinit var arrayTrans: ArrayList<TransModel>
     private lateinit var adapter: TransAdapter
     private lateinit var month_picker: TextView
@@ -63,6 +64,7 @@ class TransFragment : Fragment(), ItemTransListener {
         month_picker = view.findViewById(R.id.month_picker)
         collect = view.findViewById(R.id.collect)
         spending = view.findViewById(R.id.spending)
+        noData = view.findViewById(R.id.noData)
         total = view.findViewById(R.id.total)
         arrayTrans = ArrayList()
         adapter = TransAdapter(requireContext(), arrayTrans, this)
@@ -89,9 +91,18 @@ class TransFragment : Fragment(), ItemTransListener {
                 "WHERE date like '%/" + month + "/" + year + "'"
         var cursor: Cursor = database!!.rawQuery(query, null)
         cursor.moveToFirst()
-        while (cursor.count > 0 && cursor.isAfterLast == false){
-            val coll = cursor.getString(0).toLong()
-            val spend = cursor.getString(1).toLong()
+        var coll: Long = 0
+        var spend: Long = 0
+        while (cursor.count > 0 && cursor.isAfterLast == false && cursor != null) {
+            if (!cursor.isNull(0)) {
+                coll = cursor.getString(0).toLong()
+                noData.visibility = View.GONE
+            }
+            if (!cursor.isNull(1)) {
+                spend = cursor.getString(1).toLong()
+                noData.visibility = View.GONE
+            }
+
             var decimalFormat = DecimalFormat("###,###,###");
             collect.setText(decimalFormat.format(coll).toString())
             spending.setText(decimalFormat.format(spend).toString())
@@ -100,6 +111,9 @@ class TransFragment : Fragment(), ItemTransListener {
             cursor.moveToNext()
         }
         cursor.close()
+        if (coll <= "0".toLong() && spend <= "0".toLong()){
+            noData.visibility = View.VISIBLE
+        }
     }
 
     private fun setDate() {
@@ -114,7 +128,19 @@ class TransFragment : Fragment(), ItemTransListener {
             val title = cur.getString(0)
             val collectmoney = cur.getString(1).toLong()
             val spendingmoney = cur.getString(2).toLong()
-            arrayTrans.add(TransModel("", title, "", null, "", spendingmoney, null, collectmoney, true))
+            arrayTrans.add(
+                TransModel(
+                    "",
+                    title,
+                    "",
+                    null,
+                    "",
+                    spendingmoney,
+                    null,
+                    collectmoney,
+                    true
+                )
+            )
 
             val query =
                 "SELECT trans.id, account.id, account.name, typespending.id ,typespending.name, trans.date, trans.time, trans.money, trans.note\n" +
@@ -342,6 +368,11 @@ class TransFragment : Fragment(), ItemTransListener {
         var intent: Intent = Intent(requireContext(), UpdateActivity::class.java)
         intent.putExtra("item", item)
         startActivity(intent)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        database!!.close()
     }
 
 

@@ -97,7 +97,7 @@ class AddFragment : Fragment(), ItemAddListener {
             collect_btn.setBackgroundResource(R.drawable.button_pressed)
             spending_btn.setBackgroundResource(R.drawable.tab_selected)
             collect_btn.setTextColor(resources.getColor(R.color.primary))
-            spending_btn.setTextColor(R.color.black)
+            spending_btn.setTextColor(resources.getColor(R.color.black))
             if (clicked.equals("type")) {
                 setDataRecyclerView("type")
             }
@@ -108,7 +108,7 @@ class AddFragment : Fragment(), ItemAddListener {
             spending_btn.setBackgroundResource(R.drawable.button_pressed)
             spending_btn.setTextColor(resources.getColor(R.color.primary))
             collect_btn.setBackgroundResource(R.drawable.tab_selected)
-            collect_btn.setTextColor(R.color.black)
+            collect_btn.setTextColor(resources.getColor(R.color.black))
             if (clicked.equals("type")) {
                 setDataRecyclerView("type")
             }
@@ -521,5 +521,10 @@ class AddFragment : Fragment(), ItemAddListener {
         }
         return result.trim()
 
+    }
+
+    override fun onStop() {
+        super.onStop()
+        database.close()
     }
 }

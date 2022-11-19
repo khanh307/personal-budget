@@ -124,16 +124,34 @@
                 android:textSize="15sp" />
         </LinearLayout>
     </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerview_trans_frag"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/background"
-        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layout_detail" />
+        app:layout_constraintTop_toBottomOf="@id/layout_detail">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview_trans_frag"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/background"
+            android:orientation="vertical"/>
+
+        <TextView
+            android:layout_marginTop="100dp"
+            android:id="@+id/noData"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Không có dữ liêu"
+            android:textColor="@color/gray"
+            android:textSize="13sp"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,6 +9,6 @@
     <string-array name="chart_spiner">
         <item>Hàng Tuần</item>
         <item>Hàng Tháng</item>
-        <item>Hàng Năm</item>
+
     </string-array>
 </resources>

@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setBottomNav()
         processCopy()
+        loadFragment(ChartFragment())
     }
 
     private fun setBottomNav() {

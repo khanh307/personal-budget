@@ -167,6 +167,10 @@ class UpdateActivity : AppCompatActivity(), ItemAddListener {
                     "WHERE date = '" + item.date + "'"
         }
         database.execSQL(update)
+        val queryDelete = "DELETE FROM title\n" +
+                "WHERE collectmoney <= 0\n" +
+                " and spendingmoney <= 0"
+        database.execSQL(queryDelete)
         Toast.makeText(this, "Xóa thành công", Toast.LENGTH_SHORT).show()
         finish()
     }
@@ -253,8 +257,11 @@ class UpdateActivity : AppCompatActivity(), ItemAddListener {
             database!!.execSQL(query)
         }
 
+
+
         Toast.makeText(this, "Cập nhật thành công", Toast.LENGTH_SHORT).show()
         deleteTrans()
+
     }
 
     private fun openTimePicker(textTime: EditText) {
@@ -491,5 +498,10 @@ class UpdateActivity : AppCompatActivity(), ItemAddListener {
     fun View.hideKeyboard() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(windowToken, 0)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        database.close()
     }
 }
