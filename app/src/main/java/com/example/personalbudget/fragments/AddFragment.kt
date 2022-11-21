@@ -81,7 +81,7 @@ class AddFragment : Fragment(), ItemAddListener {
         collect_btn = view.findViewById(R.id.collect_btn)
         spending_btn = view.findViewById(R.id.spending_btn)
         val save_btn: AppCompatButton = view.findViewById(R.id.save_btn)
-        val delete_btn: AppCompatButton = view.findViewById(R.id.delete_btn)
+//        val delete_btn: AppCompatButton = view.findViewById(R.id.delete_btn)
         layoutKeyBoard = view.findViewById(R.id.layoutKeyBoard)
         recyclerView = view.findViewById(R.id.recyclerview_add_frag)
         layout_recyclerview = view.findViewById(R.id.layout_recyclerview)
@@ -499,7 +499,7 @@ class AddFragment : Fragment(), ItemAddListener {
                 Toast.makeText(requireContext(), "Nhập tên nhãn", Toast.LENGTH_SHORT).show()
             } else {
                 var result = upCase(name.toString())
-                val query = "INSERT INTO " + type + " VALUES(NULL, '" + result + "')"
+                val query = "INSERT INTO " + type + tab_select + " VALUES(NULL, '" + result + "')"
                 database.execSQL(query)
                 Toast.makeText(requireContext(), "Thêm thành công", Toast.LENGTH_SHORT).show()
                 setDataRecyclerView(type)

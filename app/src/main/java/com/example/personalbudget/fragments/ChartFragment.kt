@@ -96,17 +96,15 @@ class ChartFragment : Fragment() {
             Context.MODE_PRIVATE,
             null
         );
-
-        val calendar: Calendar = Calendar.getInstance()
-        val dates = getDayOfWeek(
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.DATE),
-            calendar.get(Calendar.MONTH)
-        )
-        begin = dates[0].toString()
-        end = dates[dates.size - 1].toString()
-
         setSpinner()
+//        val calendar: Calendar = Calendar.getInstance()
+//        val dates = getDayOfWeek(
+//            calendar.get(Calendar.YEAR),
+//            calendar.get(Calendar.DATE),
+//            calendar.get(Calendar.MONTH)
+//        )
+//        begin = "14/11/2022"
+//        end = "20/11/2022"
 
         collect_btn.setOnClickListener {
             tab_select = "collect"
@@ -125,30 +123,9 @@ class ChartFragment : Fragment() {
             collect_btn.setTextColor(resources.getColor(R.color.black))
             setupPieChart()
         }
-
-//        setUpBarChartWeek()
-        setupPieChart()
-//        setDataReccyclerView()
-
-
+//        setupPieChart()
         return view;
     }
-
-//    private fun setDataReccyclerView() {
-////        var labels = ArrayList<String>()
-//        var colors = peiChart.data.colors
-////        var persents = listOf<Float>(10f, 20f, 30f, 10f, 30f)
-//
-//        for (index in 0 until pieItemLegend.size) {
-//            val name = pieItemLegend.get(index).label
-//            val color = colors.get(index)
-//            val persent = pieItemLegend.get(index).value.toInt()
-//            val tot = (persent * abs(total)  / 100).toInt()
-//            arrayItem.add(PieChartItem(persent, name, tot, color))
-//        }
-//
-//        cardAdapter.notifyDataSetChanged()
-//    }
 
     private fun setupPieChart() {
         getData()
@@ -195,35 +172,6 @@ class ChartFragment : Fragment() {
         l.setCustom(entries)
     }
 
-//    private fun setUpBarChartWeek() {
-//        var array: java.util.ArrayList<String> = ArrayList()
-//        val query = "SELECT * FROM title\n" +
-//                "WHERE date >= '" + begin + "'\n" +
-//                "and date <= '" + end + "'\n" +
-//                "ORDER BY date DESC"
-//        var cursor = database.rawQuery(query, null)
-//        cursor.moveToFirst()
-//        while (cursor.isAfterLast == false){
-//
-//        }
-//        val a = 10F
-//        val barSet = listOf(
-//            "JAN" to a,
-//            "FEB" to 2F,
-//            "MAR" to 2F,
-//            "MAY" to 4F,
-//            "APR" to 4F
-//        )
-//        var colors = ArrayList<Int>()
-//        for (i in 0..4) {
-//            colors.add(ColorTemplate.PASTEL_COLORS.get(i))
-//        }
-//        barChart.barsColorsList = colors
-//        barChart.labelsSize = 16F
-//        barChart.animation.duration = animationDuration
-//        barChart.animate(barSet)
-//    }
-
     private fun setSpinner() {
         val adapter = ArrayAdapter.createFromResource(
             requireContext(),
@@ -251,7 +199,7 @@ class ChartFragment : Fragment() {
                         calendar.get(Calendar.MONTH)
                     )
                     begin = dates[0].toString()
-                    end = dates[dates.size - 1].toString()
+                    end = dates[6].toString()
                     text_date.setText(begin + " ~ " + end)
                     text_date.setOnClickListener {
                         openDatePicker()
@@ -276,7 +224,6 @@ class ChartFragment : Fragment() {
     }
 
     private fun getData() {
-
         arrayItem.clear()
         pieItem = ArrayList()
         pieItemLegend = ArrayList()
@@ -308,6 +255,7 @@ class ChartFragment : Fragment() {
                         "GROUP BY idtypecollect"
             }
         }
+
         total = 0
         val cursor = database.rawQuery(query, null)
         cursor.moveToFirst()
@@ -344,7 +292,6 @@ class ChartFragment : Fragment() {
 
     private fun openDatePicker() {
         var cal = Calendar.getInstance()
-
         val dateSetListener =
             DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
                 val dates = getDayOfWeek(
@@ -353,18 +300,17 @@ class ChartFragment : Fragment() {
                     monthOfYear
                 )
                 begin = dates[0].toString()
-                end = dates[dates.size - 1].toString()
+                end = dates[6].toString()
                 text_date.setText(begin + " ~ " + end)
                 setupPieChart()
             }
 
         dialog = DatePickerDialog(
             requireContext(), dateSetListener,
-            cal.get(Calendar.YEAR),
-            cal.get(Calendar.MONTH),
-            cal.get(Calendar.DAY_OF_MONTH)
+            begin.split("/")[2].toInt(),
+            begin.split("/")[1].toInt() -1,
+            begin.split("/")[0].toInt()
         )
-
         dialog.show()
     }
 
@@ -372,9 +318,9 @@ class ChartFragment : Fragment() {
         val now = Calendar.getInstance()
         now.set(Calendar.YEAR, year)
         now.set(Calendar.MONTH, month)
-        now.set(Calendar.DATE, date)
+        now.set(Calendar.DATE, date - 1)
 
-        val format = SimpleDateFormat("dd.MM.yyyy")
+        val format = SimpleDateFormat("dd/MM/yyyy")
         val days = arrayOfNulls<String>(7)
         val delta = -now[GregorianCalendar.DAY_OF_WEEK] + 2
         now.add(Calendar.DAY_OF_MONTH, delta)
